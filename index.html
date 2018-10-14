@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>TENNIS_DOM</title>
+</head>
+<body>
+
+	<script>
+		'use strict';
+		//создаём элементы для тенниса
+		var startButton = document.createElement('button'),
+			leftScore = 0,
+			rightScore = 0,
+			board = document.createElement('div'),
+			gameSpace = document.createElement('div'),
+			ball = document.createElement('div'),
+			leftRacket = document.createElement('div'),
+			rightRacket = document.createElement('div');
+
+		//стилизуем элементы
+		startButton.textContent = 'Старт!';
+		board.innerHTML = leftScore + ':' + rightScore;
+		board.style.cssText = `display: inline-block;
+							   position: relative;
+							   left: 220px;
+							   font-size: 32pt;
+							   font-weight: bold;`;
+		gameSpace.style.cssText = `width: 600px;
+							       height: 400px;
+							       position: relative;
+							       background-color: #f0ee7e;
+							       border: solid black 3px;`;
+		ball.style.cssText = `width: 50px;
+							  height: 50px;
+							  position: absolute;
+							  top: 175px;
+							  left: 275px;
+							  background-color: #f02137;
+							  border-radius: 25px;`;
+		leftRacket.style.cssText = `width: 10px;
+							        height: 120px;
+							        position: absolute;
+							        top: 140px;
+							        background-color: #09aa57;
+							        border: solid black 1px;`;
+		rightRacket.style.cssText = `width: 10px;
+							        height: 120px;
+							        position: absolute;
+							        top: 140px;
+							        right: 0;
+							        background-color: #191497;
+							        border: solid black 1px;`;
+
+
+		//добавляем элементы на страницу
+		document.body.appendChild(startButton);
+		document.body.appendChild(board);
+		document.body.appendChild(gameSpace);
+		gameSpace.appendChild(leftRacket);
+		gameSpace.appendChild(rightRacket);
+		gameSpace.appendChild(ball);
+
+		//по клику на кнопку вызываем функцию запуска мяча
+		startButton.addEventListener('click', start);
+
+		//получаем значения позиций и размеров игрового стола и ракеток, а потом
+		//записываем их в хэши в абсолютных размерах относительно всей страницы
+		//включая прокрутку
+		var posGameSpace = gameSpace.getBoundingClientRect(),
+			gameSpaceXY = {
+				left: Math.floor(posGameSpace.left + window.pageXOffset),
+				top: Math.floor(posGameSpace.top + window.pageYOffset),
+				right: Math.floor(posGameSpace.right + window.pageXOffset),
+				bottom: Math.floor(posGameSpace.bottom + window.pageYOffset)
+			};
+
+		var posLeftRacket = leftRacket.getBoundingClientRect(),
+			leftRacketXY = {
+				left: Math.floor(posLeftRacket.left + window.pageXOffset),
+				top: Math.floor(posLeftRacket.top + window.pageYOffset),
+				right: Math.floor(posLeftRacket.right + window.pageXOffset),
+				bottom: Math.floor(posLeftRacket.bottom + window.pageYOffset),
+				width: Math.floor(posLeftRacket.width)
+			};
+
+		var posRightRacket = rightRacket.getBoundingClientRect(),
+			rightRacketXY = {
+				left: Math.floor(posRightRacket.left + window.pageXOffset),
+				top: Math.floor(posRightRacket.top + window.pageYOffset),
+				right: Math.floor(posRightRacket.right + window.pageXOffset),
+				bottom: Math.floor(posRightRacket.bottom + window.pageYOffset),
+				width: Math.floor(posRightRacket.width)
+			};
+
+
+		//массив активных событий клавиатуры
+		let kbdEvents = [];
+
+		//вешаем обработчик событий при нажатии клавиш
+		window.addEventListener('keydown', function(e) {
+			switch (e.keyCode) {
+				case 38:
+				case 40:
+				case 16:
+				case 17:
+					e.preventDefault();
+					break;
+			}
+			//записываем каждое нажатие в массив events
+			kbdEvents[e.keyCode] = true;
+			moveRacket();
+		});
+
+		//вешаем обработчик событий при отпускании клавиш
+		window.addEventListener('keyup', function(e) {
+			//удаляем каждое нажатие из массива events
+			kbdEvents[e.keyCode] = false;
+		});
+
+		//функция движения ракеток
+		function moveRacket() {
+			if(kbdEvents[38]) {
+				//движение вверх правой ракетки
+				if (rightRacketXY.top <= gameSpaceXY.top + 8) {
+
+				} else {
+					rightRacket.style.top = parseInt(rightRacket.style.top) - 15 + 'px';
+				}
+			} else if(kbdEvents[40]) {
+				//движение вниз правой ракетки
+				if (rightRacketXY.bottom >= gameSpaceXY.bottom - 8) {
+
+				} else {
+					rightRacket.style.top = parseInt(rightRacket.style.top) + 15 + 'px';
+				}
+			}
+
+			if (kbdEvents[16]) {
+				//движение вверх левой ракетки
+				if (leftRacketXY.top <= gameSpaceXY.top + 8) {
+
+				} else {
+					leftRacket.style.top = parseInt(leftRacket.style.top) - 15 + 'px';
+				}
+			} else if (kbdEvents[17]) {
+				//движение вниз левой ракетки
+				if (leftRacketXY.bottom >= gameSpaceXY.bottom - 8) {
+
+				} else {
+					leftRacket.style.top = parseInt(leftRacket.style.top) + 15 + 'px';
+
+				}
+			}
+
+			//перезаписываем новые полученные значения позиций ракеток в хэши
+			posLeftRacket = leftRacket.getBoundingClientRect();
+			leftRacketXY.top = Math.floor(posLeftRacket.top + window.pageYOffset);
+			leftRacketXY.bottom = Math.floor(posLeftRacket.bottom + window.pageYOffset);
+
+			posRightRacket = rightRacket.getBoundingClientRect();
+			rightRacketXY.top = Math.floor(posRightRacket.top + window.pageYOffset);
+			rightRacketXY.bottom = Math.floor(posRightRacket.bottom + window.pageYOffset);
+
+		}
+
+		//счётчик начатых игр
+		let counter = 0;
+
+		//запуск игры
+		function start() {
+
+			//если игра не закончена, то ничего не делаем
+			//иначе запускаем новую
+			if(counter === (leftScore + rightScore)) {
+
+				counter++;
+				ball.style.left = '275px';
+				ball.style.top = '175px';
+
+
+				//случайное направление вектора
+				var x = Math.floor(Math.random()*2),
+					y = Math.floor(Math.random()*2),
+					vectorX = 1 - 2*x,
+					vectorY = 1 - 2*y;
+				//случайный коэффициент приращения координат
+				var indX = Math.floor(Math.random()*5) + 3,
+					indY = Math.floor(Math.random()*3) + 1;
+
+				var timer;
+				//запускаем игру через 1сек
+				setTimeout(function() {
+					timer = requestAnimationFrame(go);
+			    },
+			    1000);
+
+				//запуск шарика
+				function go() {
+
+					ball.style.left = parseInt(ball.style.left) + indX*vectorX + 'px';
+					ball.style.top = parseInt(ball.style.top) + indY*vectorY + 'px';
+
+					//получаем значения позиций и размеров шарика, а потом
+					//записываем их в хэш в абсолютных размерах относительно всей страницы
+					//включая прокрутку
+					var posBall = ball.getBoundingClientRect(),
+						ballXY = {
+							left: Math.floor(posBall.left + window.pageXOffset),
+							top: Math.floor(posBall.top + window.pageYOffset),
+							right: Math.floor(posBall.right + window.pageXOffset),
+							bottom: Math.floor(posBall.bottom + window.pageYOffset),
+							radius: Math.floor(posBall.width)/2
+						};
+					//если мячик ударяется об правую ракетку
+					if ((ballXY.right >= (gameSpaceXY.right - rightRacketXY.width)) &&
+						((ballXY.top + ballXY.radius) >= rightRacketXY.top) &&
+						((ballXY.top + ballXY.radius) <= rightRacketXY.bottom)) {
+							vectorX *= -1;
+							timer = requestAnimationFrame(go);
+					//если мячик ударяется об левую ракетку
+					} else if ((ballXY.left <= (gameSpaceXY.left + leftRacketXY.width)) &&
+						((ballXY.top + ballXY.radius) >= leftRacketXY.top) &&
+						((ballXY.top + ballXY.radius) <= leftRacketXY.bottom)) {
+							vectorX *= -1;
+							timer = requestAnimationFrame(go);
+					//если мячик ударяется правую стенку
+					} else if (ballXY.right >= gameSpaceXY.right) {
+						cancelAnimationFrame(timer);
+						leftScore++;
+						board.innerHTML = leftScore + ':' + rightScore;
+				    //если мячик ударяется левую стенку
+					} else if (ballXY.left <= gameSpaceXY.left) {
+						cancelAnimationFrame(timer);
+						rightScore++;
+						board.innerHTML = leftScore + ':' + rightScore;
+					} else if (ballXY.top > gameSpaceXY.top && ballXY.bottom < gameSpaceXY.bottom) {
+						timer = requestAnimationFrame(go);
+					//если мячик ударяется о верхнюю или нижнюю стенку
+					} else if (ballXY.top <= gameSpaceXY.top || ballXY.bottom >= gameSpaceXY.bottom) {
+						vectorY *= -1;
+						timer = requestAnimationFrame(go);
+					}
+
+				}
+
+			}
+
+		}
+
+	</script>
+
+</body>
+</html>
